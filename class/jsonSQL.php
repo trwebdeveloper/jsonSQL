@@ -13,7 +13,7 @@ class jsonSQL
 
     function db()
     {
-        $this->database = fopen(DATABASE, 'r+b');
+        $this->database = fopen(DATABASE, 'r+b') or exit(ERR_CANT_OPEN);
     }
 
     function read()
@@ -30,49 +30,14 @@ class jsonSQL
         if (is_writable(DATABASE)) {
             $data = json_encode($data);
             if ($data === false || is_null($data)) {
-                exit('Error json encode');
+                exit(ERR_JSON_ENCODE);
             }
             $status = fwrite($this->database, $data);
             echo $status;
         } else {
-            echo 'This file not writable';
+            echo ERR_NOT_WRITABLE;
         }
     }
-	
-	function array_sort($array, $on, $order=SORT_ASC)
-	{
-		$new_array = array();
-		$sortable_array = array();
-
-		if (count($array) > 0) {
-			foreach ($array as $k => $v) {
-				if (is_array($v)) {
-					foreach ($v as $k2 => $v2) {
-						if ($k2 == $on) {
-							$sortable_array[$k] = $v2;
-						}
-					}
-				} else {
-					$sortable_array[$k] = $v;
-				}
-			}
-
-			switch ($order) {
-				case SORT_ASC:
-					asort($sortable_array);
-					break;
-				case SORT_DESC:
-					arsort($sortable_array);
-					break;
-			}
-
-			foreach ($sortable_array as $k => $v) {
-				$new_array[$k] = $array[$k];
-			}
-		}
-
-		return $new_array;
-	}
 
     function select($table = false, $callback = false)
     {
@@ -87,22 +52,46 @@ class jsonSQL
         return $this;
     }
 
-    function sort($type, $sort = false)
+    function array_sort($array, $on, $order=SORT_ASC)
     {
-        if (isset($this->table[$type])) {
-            $this->result = $this->sort = $this->array_sort($this->table, $type, $sort);
+        $new_array = array();
+        $sortable_array = array();
+
+        if (count($array) > 0) {
+            foreach ($array as $k => $v) {
+                if (is_array($v)) {
+                    foreach ($v as $k2 => $v2) {
+                        if ($k2 == $on) {
+                            $sortable_array[$k] = $v2;
+                        }
+                    }
+                } else {
+                    $sortable_array[$k] = $v;
+                }
+            }
+
+            switch ($order) {
+                case SORT_ASC:
+                    asort($sortable_array);
+                    break;
+                case SORT_DESC:
+                    arsort($sortable_array);
+                    break;
+            }
+
+            foreach ($sortable_array as $k => $v) {
+                $new_array[$k] = $array[$k];
+            }
         }
-        return $this;
+
+        return $new_array;
     }
 
-
-//    function where($where)
-//    {
-//        if (isset($this->table[$where])) {
-//            $this->result = $this->where = $this->table[$where];
-//        }
-//        return $this;
-//    }
+    function sort($type, $sort = false)
+    {
+            $this->result = $this->limit = $this->table = $this->value = $this->array_sort($this->table, $type, $sort);
+        return $this;
+    }
 
     function filter($type, $keyValue)
     {
@@ -112,7 +101,7 @@ class jsonSQL
                 $arr[$key] = $value;
             }
         }
-        $this->result = $this->table = $this->value = $arr;
+        $this->result = $this->limit = $this->table = $this->value = $arr;
         return $this;
     }
 
@@ -121,7 +110,7 @@ class jsonSQL
         $i = 0;
         $l = $offset + $limit;
         $arr = [];
-        foreach ($this->table as $key => $value) {
+        foreach ($this->limit as $key => $value) {
             $i++;
             if ($i > $offset) {
                 $arr[$key] = $value;
@@ -130,7 +119,7 @@ class jsonSQL
                 break;
             }
         }
-        $this->result = $this->table = $this->value = $arr;
+        $this->result = $this->limit = $this->table = $this->value = $arr;
         return $this;
     }
 

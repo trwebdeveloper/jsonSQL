@@ -34,3 +34,6 @@ $valueSort = $db->select('news')->sort('id', SORT_DESC)->result();
 // Offset and Limit
 $valueLimit = $db->select('news')->limit(0,10)->result();
 $valueLimitFilter = $db->select('news')->filter('category', 'football')->limit(0,10)->result();
+
+// Filter,SORT and Limit
+$valueFilterSortLimit = $db->select('news')->filter('category','football')->sort('id', SORT_DESC)->limit(5,5)->result();
