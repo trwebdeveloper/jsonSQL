@@ -29,7 +29,7 @@ $valueList = $db->select('news')->result();
 $valueFilter = $db->select('news')->filter('category', 'football')->result();
 
 // Sort by id (DESC, ASC) , default ASC
-$valueSort = $db->select('news')->sort('id', SORT_DESC);
+$valueSort = $db->select('news')->sort('id', SORT_DESC)->result();
 
 // Offset and Limit
 $valueLimit = $db->select('news')->limit(0,10)->result();
