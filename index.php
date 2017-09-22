@@ -37,3 +37,7 @@ $valueLimitFilter = $db->select('news')->filter('category', 'football')->limit(0
 
 // Filter,SORT and Limit
 $valueFilterSortLimit = $db->select('news')->filter('category','football')->sort('id', SORT_DESC)->limit(5,5)->result();
+
+// ID
+$valueID = $db->select('news')->id('SXHBQ653862SXQ')->result();
+$valueFilterID = $db->select('news')->filter('category','football')->id('SXHBQ653862SXQ')->result();

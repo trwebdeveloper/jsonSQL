@@ -1,4 +1,5 @@
 <?php
+
 class jsonSQL
 {
     private $database;
@@ -10,6 +11,7 @@ class jsonSQL
     private $result;
     private $insertTable;
     private $insertCategory;
+    public $lastId;
 
     function db()
     {
@@ -24,6 +26,27 @@ class jsonSQL
         return json_decode($file, true);
     }
 
+    function addId($data)
+    {
+        $id = 1;
+        foreach ($data as $key => $value){
+            $data[$key]['id'] = $id++;
+        }
+        return $data;
+    }
+
+    function downImage($data){
+        foreach ($data[$this->insertTable] as $key => $value){
+            if(strpos($value['image'], 'ttp://')){
+                $expImg = explode('.', $value['image']);
+                $imagePath = 'json/images/'.permalink($value['title']).'-'.$key.'.'.end($expImg);
+                multiSave(array($value['image']), array($imagePath));
+                $data[$this->insertTable][$key]['image'] = $imagePath;
+            }
+        }
+        return $data;
+    }
+
     function add($data, $image = false)
     {
         $this->db();
@@ -33,7 +56,6 @@ class jsonSQL
                 exit(ERR_JSON_ENCODE);
             }
             $status = fwrite($this->database, $data);
-            echo $status;
         } else {
             echo ERR_NOT_WRITABLE;
         }
@@ -46,13 +68,13 @@ class jsonSQL
         } else {
             $this->value = $this->read();
             if (isset($this->value[$table])) {
-                $this->result = $this->table = $this->value[$table];
+                $this->result = $this->table = $this->addId($this->value[$table]);
             }
         }
         return $this;
     }
 
-    function array_sort($array, $on, $order=SORT_ASC)
+    function array_sort($array, $on, $order = SORT_DESC)
     {
         $new_array = array();
         $sortable_array = array();
@@ -89,7 +111,7 @@ class jsonSQL
 
     function sort($type, $sort = false)
     {
-            $this->result = $this->limit = $this->table = $this->value = $this->array_sort($this->table, $type, $sort);
+        $this->result = $this->limit = $this->table = $this->value = $this->array_sort($this->table, $type, $sort);
         return $this;
     }
 
@@ -143,11 +165,16 @@ class jsonSQL
 
     function id($id)
     {
-        if (isset($this->where[$id])) {
-            $this->result = $this->where[$id];
+        if (isset($this->table[$id])) {
+            $this->result = $this->table[$id];
         }
 
         return $this;
+    }
+
+    function getLastId()
+    {
+        return $this->lastId;
     }
 
     function getTable()
