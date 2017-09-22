@@ -5,6 +5,7 @@ class jsonSQL
     private $database;
     private $value;
     private $table;
+    private $itemId;
     private $where;
     private $filter;
     private $sort;
@@ -29,17 +30,18 @@ class jsonSQL
     function addId($data)
     {
         $id = 1;
-        foreach ($data as $key => $value){
+        foreach ($data as $key => $value) {
             $data[$key]['id'] = $id++;
         }
         return $data;
     }
 
-    function downImage($data){
-        foreach ($data[$this->insertTable] as $key => $value){
-            if(strpos($value['image'], 'ttp://')){
+    function downImage($data)
+    {
+        foreach ($data[$this->insertTable] as $key => $value) {
+            if (strpos($value['image'], 'ttp://')) {
                 $expImg = explode('.', $value['image']);
-                $imagePath = 'json/images/'.permalink($value['title']).'-'.$key.'.'.end($expImg);
+                $imagePath = 'json/images/' . permalink($value['title']) . '-' . $key . '.' . end($expImg);
                 multiSave(array($value['image']), array($imagePath));
                 $data[$this->insertTable][$key]['image'] = $imagePath;
             }
@@ -166,9 +168,17 @@ class jsonSQL
     function id($id)
     {
         if (isset($this->table[$id])) {
-            $this->result = $this->table[$id];
+            $this->result = $this->itemId = $this->table[$id];
         }
 
+        return $this;
+    }
+
+    function item($key)
+    {
+        if(isset($this->itemId[$key])){
+            $this->result = $this->itemId[$key];
+        }
         return $this;
     }
 
